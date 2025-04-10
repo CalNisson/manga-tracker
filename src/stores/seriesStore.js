@@ -79,7 +79,7 @@ export async function updateSeries(id, data) {
 }
 
 export async function deleteSeriesById(id) {
-  const response = await fetch(`${API_BASE}/api/series/${id}`, {
+  const response = await fetch(`${API_BASE}/series/${id}`, {
     method: 'DELETE'
   });
 
