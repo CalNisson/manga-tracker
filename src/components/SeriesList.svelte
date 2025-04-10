@@ -1,5 +1,7 @@
 <script>
   import { seriesStore } from '../stores/seriesStore';
+  import { deleteSeriesById } from '../stores/seriesStore.js';
+  import EditSeriesModal from './EditSeriesModal.svelte';
   import SeriesEntry from './SeriesEntry.svelte';
   import { onDestroy } from 'svelte';
 
@@ -12,6 +14,22 @@
   let unsubscribe = seriesStore.subscribe(data => {
     seriesData = data;
   });
+  let selectedSeries = null;
+
+  function openEditModal(series) {
+    selectedSeries = series;
+  }
+
+  function closeModal() {
+    selectedSeries = null;
+  }
+
+  function handleDeleteSeries(seriesToDelete) {
+    deleteSeriesById(seriesToDelete.id);
+    seriesData = seriesData.filter(s => s.id !== seriesToDelete.id);
+    filteredSeries = filteredSeries.filter(s => s.id !== seriesToDelete.id);
+  }
+
 
   onDestroy(() => unsubscribe());
 
@@ -36,6 +54,13 @@
   <p>No series found.</p>
 {:else}
   {#each filteredSeries as series (series.id)}
-    <SeriesEntry {series} />
+    <SeriesEntry 
+      {series} 
+      on:edit={(e) => openEditModal(e.detail)}
+      on:delete={(e) => handleDeleteSeries(e.detail)} />
   {/each}
+{/if}
+
+{#if selectedSeries}
+  <EditSeriesModal series={selectedSeries} on:close={closeModal} />
 {/if}
