@@ -1,0 +1,50 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Trigger the workflow on push to the `main` branch
+  workflow_dispatch:  # Allows you to manually trigger the workflow from the GitHub UI
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # You can adjust this to your preferred version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the project
+        run: npm run build
+
+      - name: Upload artifacts to GitHub Pages
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: './dist'  # Path to your build output folder
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          branch: gh-pages  # You can change this if you'd like to deploy to a different branch
+          folder: './dist'  # The folder where your built app is located
