@@ -1,16 +1,23 @@
 name: Deploy to GitHub Pages
 
 on:
+  # Trigger the workflow every time you push to the `main` branch
+  # Using a different branch name? Replace `main` with your branch’s name
   push:
     branches:
-      - main  # Trigger the workflow on push to the `main` branch
-  workflow_dispatch:  # Allows you to manually trigger the workflow from the GitHub UI
+      - main
 
+  # Allows you to run this workflow manually from the Actions tab on GitHub.
+  workflow_dispatch:
+
+# Allow this job to clone the repo and create a page deployment
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -19,32 +26,41 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
+      - name: Install Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # You can adjust this to your preferred version
+          node-version: 18
+          cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Build the project
-        run: npm run build  # Ensure this command works for your setup
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+        with:
+          static_site_generator: sveltekit
 
-      - name: Upload artifacts to GitHub Pages
+      - name: Build
+        run: npm run build
+
+      - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist'  # Path to your build output folder (ensure this is correct based on your setup)
+          # this should match the `pages` option in your adapter-static options
+          path: 'build/'
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     steps:
-      - name: Deploy to GitHub Pages
+      - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          branch: gh-pages  # You can change this if you'd like to deploy to a different branch
-          folder: './dist'  # The folder where your built app is located (verify this is the correct output folder)
