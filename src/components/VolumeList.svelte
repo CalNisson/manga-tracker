@@ -1,14 +1,41 @@
 <script>
-  import { toggleOwned } from '../stores/seriesStore';
+  import { seriesStore } from '../stores/seriesStore';
+  import { progressMap } from '../stores/progressStore.js';
   import { createEventDispatcher } from 'svelte';
   export let series;
 
+  let ownedCount = 0;
+  let totalCount = series.total_volumes;
+
   const dispatch = createEventDispatcher();
 
-  async function handleClick(volume) {
-    await toggleOwned(volume.id);        // sync backend
-    dispatch('volumeToggle', volume.id); // notify parent to update UI
+  function updateProgress() {
+    ownedCount = series.volumes.filter(v => v.owned).length;
+    const percent = (ownedCount / totalCount) * 100;
+    progressMap.update(map => {
+      return { ...map, [series.id]: percent };
+    });
   }
+
+  function toggleOwned(volumeId) {
+    const volumeIndex = series.volumes.findIndex(v => v.id === volumeId);
+    if (volumeIndex !== -1) {
+      // Create a shallow copy of the volumes array
+      const updatedVolumes = [...series.volumes];
+      updatedVolumes[volumeIndex] = {
+        ...updatedVolumes[volumeIndex],
+        owned: !updatedVolumes[volumeIndex].owned
+      };
+
+      // Update the series.volumes reference to trigger reactivity
+      series.volumes = updatedVolumes;
+
+      updateProgress();
+      dispatch('volumeToggle', volumeId);
+    }
+  }
+
+  updateProgress();
 </script>
 
 {#if series.volumes?.length}
@@ -16,7 +43,7 @@
     {#each series.volumes as v (v.id)}
       <div
         class="volume {v.owned ? 'owned' : ''}"
-        on:click={() => handleClick(v)}>
+        on:click={() => toggleOwned(v.id)}>
         Vol. {v.volume_number}
       </div>
     {/each}

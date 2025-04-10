@@ -1,9 +1,11 @@
 <script>
   import { toggleComplete } from '../stores/seriesStore';
+  import { progressMap } from '../stores/progressStore.js';
   import VolumeList from './VolumeList.svelte';
 
   export let series;
   let expanded = false;
+  let percent = 0;
 
   function toggleExpanded() {
     expanded = !expanded;
@@ -23,7 +25,15 @@
   }
 
   const ownedCount = () => (series.volumes || []).filter(v => v.owned).length;
-  const percent = () => series.total_volumes ? Math.round((ownedCount() / series.total_volumes) * 100) : 0;
+  $: progressMap.subscribe(map => {
+    if (map[series.id] != null) {
+      percent = Math.round(map[series.id]);
+    } else {
+      // fallback to local calculation
+      const owned = series.volumes.filter(v => v.owned).length;
+      percent = Math.round((owned / series.total_volumes) * 100);
+    }
+  });
 
   $: sortedSeries = {
   ...series,
@@ -34,14 +44,14 @@
 <div class="series-entry">
   <div class="header" on:click={toggleExpanded}>
     <h3>{series.title}</h3>
-    <span>{ownedCount()}/{series.total_volumes || '?'} owned ({percent()}%)</span>
+    <span>{ownedCount()}/{series.total_volumes || '?'} owned ({percent}%)</span>
     {#if series.completed}
       <span class="status">✅</span>
     {/if}
   </div>
 
   <div class="progress-bar">
-    <div class="progress-fill" style="width: {percent()}%;"></div>
+    <div class="progress-fill" style="width: {percent}%;"></div>
   </div>
 
   {#if expanded}
@@ -72,6 +82,7 @@
   }
   .progress-bar {
     margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
     height: 10px;
     background-color: #eee;
     border-radius: 5px;
