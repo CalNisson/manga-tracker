@@ -31,12 +31,12 @@ jobs:
         run: npm install
 
       - name: Build the project
-        run: npm run build
+        run: npm run build  # Ensure this command works for your setup
 
       - name: Upload artifacts to GitHub Pages
-        uses: actions/upload-pages-artifact@v2
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: './dist'  # Path to your build output folder
+          path: './dist'  # Path to your build output folder (ensure this is correct based on your setup)
 
   deploy:
     needs: build
@@ -47,4 +47,4 @@ jobs:
         uses: actions/deploy-pages@v4
         with:
           branch: gh-pages  # You can change this if you'd like to deploy to a different branch
-          folder: './dist'  # The folder where your built app is located
+          folder: './dist'  # The folder where your built app is located (verify this is the correct output folder)
