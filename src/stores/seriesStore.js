@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 
 export const seriesStore = writable([]);
-const API_BASE = "http://localhost:8000";
+const API_BASE = "https://manga-collection-backend-0fqi.onrender.com";
 
 export async function fetchSeries() {
   try {
