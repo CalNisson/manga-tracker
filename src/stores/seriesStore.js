@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store';
 
 export const seriesStore = writable([]);
-const API_BASE = "https://manga-collection-backend-0fqi.onrender.com";
+const API_BASE = "http://localhost:8000";
 
 export async function fetchSeries() {
   try {
@@ -47,10 +47,16 @@ export async function toggleComplete(id) {
 
 export async function toggleOwned(volumeId) {
   const res = await fetch(`${API_BASE}/volumes/${volumeId}/toggle`, {
-    method: 'POST'
+    method: 'POST',
   });
-  if (res.ok) fetchSeries();
+
+  if (res.ok) {
+    fetchSeries();
+  } else {
+    console.error('Failed to update volume ownership:', await res.text());
+  }
 }
+
 
 export async function updateSeries(id, data) {
   const response = await fetch(`${API_BASE}/series/${id}/update_total`, {

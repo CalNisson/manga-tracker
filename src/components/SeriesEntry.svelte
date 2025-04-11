@@ -9,6 +9,7 @@
   let expanded = false;
   let percent = 0;
   let showMenu = false;
+  let ownedCount = () => (series.volumes || []).filter(v => v.owned).length;
 
   const dispatch = createEventDispatcher();
 
@@ -45,8 +46,6 @@
     };
   }
 
-  const ownedCount = () => (series.volumes || []).filter(v => v.owned).length;
-
   $: progressMap.subscribe(map => {
     if (map[series.id] != null) {
       percent = Math.round(map[series.id]);
@@ -55,6 +54,8 @@
       percent = Math.round((owned / series.total_volumes) * 100);
     }
   });
+
+  $: ownedCount = series.volumes ? series.volumes.filter(v => v.owned).length : 0;
 
   $: sortedSeries = {
     ...series,
@@ -84,7 +85,7 @@
 <div class="series-entry">
   <div class="header" on:click={toggleExpanded}>
     <h3>{series.title}</h3>
-    <span>{ownedCount()}/{series.total_volumes || '?'} owned ({percent}%)</span>
+    <span>{ownedCount}/{series.total_volumes || '?'} owned ({percent}%)</span>
     {#if series.completed}
       <span class="status">✅</span>
     {/if}

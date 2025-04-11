@@ -1,5 +1,5 @@
 <script>
-  import { seriesStore } from '../stores/seriesStore';
+  import { seriesStore, toggleOwned } from '../stores/seriesStore';
   import { progressMap } from '../stores/progressStore.js';
   import { createEventDispatcher } from 'svelte';
   export let series;
@@ -17,20 +17,21 @@
     });
   }
 
-  function toggleOwned(volumeId) {
+  async function handleToggleOwnership(volumeId) {
     const volumeIndex = series.volumes.findIndex(v => v.id === volumeId);
     if (volumeIndex !== -1) {
-      // Create a shallow copy of the volumes array
       const updatedVolumes = [...series.volumes];
       updatedVolumes[volumeIndex] = {
         ...updatedVolumes[volumeIndex],
         owned: !updatedVolumes[volumeIndex].owned
       };
 
-      // Update the series.volumes reference to trigger reactivity
+      // Update local volumes
       series.volumes = updatedVolumes;
-
       updateProgress();
+
+      // Now update the backend and the store
+      await toggleOwned(volumeId);  // <-- Call the `toggleOwned` function from seriesStore.js
       dispatch('volumeToggle', volumeId);
     }
   }
@@ -43,7 +44,7 @@
     {#each series.volumes as v (v.id)}
       <div
         class="volume {v.owned ? 'owned' : ''}"
-        on:click={() => toggleOwned(v.id)}>
+        on:click={() => handleToggleOwnership(v.id)}>
         Vol. {v.volume_number}
       </div>
     {/each}
