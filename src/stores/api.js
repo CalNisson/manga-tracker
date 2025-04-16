@@ -1,0 +1,1 @@
+export const API_BASE = "https://manga-collection-backend-0fqi.onrender.com";

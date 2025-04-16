@@ -1,11 +1,25 @@
 import { writable } from 'svelte/store';
+import { token } from './authStore';
 
 export const seriesStore = writable([]);
 const API_BASE = "https://manga-collection-backend-0fqi.onrender.com";
 
+async function authFetch(url, options = {}) {
+  const $token = localStorage.getItem('token');
+  if (!$token) throw new Error("Not authenticated");
+
+  const headers = options.headers || {};
+  headers['Authorization'] = `Bearer ${$token}`;
+  headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+  options.headers = headers;
+
+  console.log("Using token:", $token);
+  return fetch(url, options);
+}
+
 export async function fetchSeries() {
   try {
-    const res = await fetch(`${API_BASE}/series`);
+    const res = await authFetch(`${API_BASE}/series`);
     if (res.ok) {
       const data = await res.json();
       seriesStore.set(data);
@@ -17,37 +31,31 @@ export async function fetchSeries() {
 
 export async function addSeries(title, totalVolumes) {
   const payload = { title, total_volumes: totalVolumes };
-  const res = await fetch(`${API_BASE}/series`, {
+  const res = await authFetch(`${API_BASE}/series`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });
   if (res.ok) fetchSeries();
 }
 
 export async function toggleComplete(id) {
-  const response = await fetch(`${API_BASE}/series/${id}/toggle_complete`, {
+  const res = await authFetch(`${API_BASE}/series/${id}/toggle_complete`, {
     method: 'PATCH'
   });
 
-  if (!response.ok) {
-    console.error('Failed to toggle complete:', await response.text());
-    throw new Error('Failed to toggle complete');
+  if (res.ok) {
+    const updatedSeries = await res.json();
+    seriesStore.update(seriesList =>
+      seriesList.map(s => s.id === id ? updatedSeries : s)
+    );
+  } else {
+    console.error('Failed to toggle complete:', await res.text());
   }
-
-  const updatedSeries = await response.json();
-
-  seriesStore.update(seriesList =>
-    seriesList.map(s =>
-      s.id === id ? updatedSeries : s
-    )
-  );
 }
 
-
 export async function toggleOwned(volumeId) {
-  const res = await fetch(`${API_BASE}/volumes/${volumeId}/toggle`, {
-    method: 'POST',
+  const res = await authFetch(`${API_BASE}/volumes/${volumeId}/toggle`, {
+    method: 'POST'
   });
 
   if (res.ok) {
@@ -57,43 +65,30 @@ export async function toggleOwned(volumeId) {
   }
 }
 
-
 export async function updateSeries(id, data) {
-  const response = await fetch(`${API_BASE}/series/${id}/update_total`, {
+  const res = await authFetch(`${API_BASE}/series/${id}/update_total`, {
     method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      title: data.title,
-      total_volumes: data.total_volumes
-    }),
+    body: JSON.stringify(data)
   });
 
-  if (!response.ok) {
-    console.error('Failed to update series:', await response.text());
-    throw new Error('Failed to update series');
+  if (res.ok) {
+    const updatedSeries = await res.json();
+    seriesStore.update(seriesList =>
+      seriesList.map(s => s.id === id ? updatedSeries : s)
+    );
+  } else {
+    console.error('Failed to update series:', await res.text());
   }
-
-  const updatedSeries = await response.json();
-
-  seriesStore.update(seriesList =>
-    seriesList.map(s =>
-      s.id === id ? updatedSeries : s
-    )
-  );
 }
 
 export async function deleteSeriesById(id) {
-  const response = await fetch(`${API_BASE}/series/${id}`, {
+  const res = await authFetch(`${API_BASE}/series/${id}`, {
     method: 'DELETE'
   });
 
-  if (!response.ok) {
-    console.error('Failed to delete series:', await response.text());
-    throw new Error('Failed to delete series');
+  if (res.ok) {
+    seriesStore.update(seriesList => seriesList.filter(s => s.id !== id));
+  } else {
+    console.error('Failed to delete series:', await res.text());
   }
-
-  // Optionally update the store if you're using seriesStore
-  seriesStore.update(seriesList => seriesList.filter(s => s.id !== id));
 }
