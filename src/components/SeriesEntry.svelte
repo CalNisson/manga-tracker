@@ -83,40 +83,59 @@
 </script>
 
 <div class="series-entry">
-  <div class="header" on:click={toggleExpanded}>
-    <h3>{series.title}</h3>
-    <span>{ownedCount}/{series.total_volumes || '?'} owned ({percent}%)</span>
-    {#if series.completed}
-      <span class="status">✅</span>
-    {/if}
+  <div class="series-layout">
+    <div class="series-image">
+      {#if series.image_url}
+        <img src={series.image_url} alt={`Cover for ${series.title}`} />
+      {:else}
+        <div class="placeholder-image">No Image</div>
+      {/if}
+    </div>
 
-    <!-- 3-dot menu -->
-    <div class="menu-container">
-      <button class="menu-button" on:click={toggleMenu}>⋮</button>
-      {#if showMenu}
-        <div class="dropdown">
-          <div class="dropdown-item" on:click|stopPropagation={editSeries}>✏️ Edit Series</div>
-          <div class="dropdown-item" on:click|stopPropagation={toggleCompleteStatus}>
-            {series.completed ? '❌ Mark Incomplete' : '✅ Mark Complete'}
-          </div>
-          <div class="dropdown-item" on:click|stopPropagation={deleteSeries}>🗑️ Delete Series</div>
+    <div class="series-content">
+      <div class="series-header" on:click={toggleExpanded}>
+        <h3>{series.title}</h3>
+        <span>{ownedCount}/{series.total_volumes || '?'} owned ({percent}%)</span>
+        {#if series.completed}
+          <span class="status">✅</span>
+        {/if}
+    
+        <div class="menu-container">
+          <button class="menu-button" on:click={toggleMenu}>⋮</button>
+          {#if showMenu}
+            <div class="dropdown">
+              <div class="dropdown-item" on:click|stopPropagation={editSeries}>✏️ Edit Series</div>
+              <div class="dropdown-item" on:click|stopPropagation={toggleCompleteStatus}>
+                {series.completed ? '❌ Mark Incomplete' : '✅ Mark Complete'}
+              </div>
+              <div class="dropdown-item" on:click|stopPropagation={deleteSeries}>🗑️ Delete Series</div>
+            </div>
+          {/if}
         </div>
+      </div>
+    
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: {percent}%;"></div>
+      </div>
+    
+      {#if expanded}
+        {#key series.id}
+          <VolumeList series={sortedSeries} on:volumeToggle={e => handleVolumeToggle(e.detail)} />
+        {/key}
       {/if}
     </div>
   </div>
-
-  <div class="progress-bar">
-    <div class="progress-fill" style="width: {percent}%;"></div>
-  </div>
-
-  {#if expanded}
-    {#key series.id}
-      <VolumeList series={sortedSeries} on:volumeToggle={e => handleVolumeToggle(e.detail)} />
-    {/key}
-  {/if}
 </div>
 
 <style>
+  .series-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    gap: 1rem;
+  }
+
   .series-entry {
     border: 1px solid #ccc;
     padding: 1rem;
@@ -124,6 +143,13 @@
     border-radius: 0.5rem;
     position: relative;
   }
+
+  .series-layout {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
   .header {
     display: flex;
     justify-content: space-between;
@@ -131,17 +157,20 @@
     cursor: pointer;
     gap: 1rem;
   }
+
   .status {
     margin-left: 0.5rem;
   }
+
   .progress-bar {
-    margin-top: 0.5rem;
+    margin-top: auto;
     margin-bottom: 0.5rem;
     height: 10px;
     background-color: #eee;
     border-radius: 5px;
     overflow: hidden;
   }
+
   .progress-fill {
     height: 100%;
     background-color: #4caf50;
@@ -180,6 +209,40 @@
 
   .volume.owned {
     animation: flash-own 0.3s ease;
+  }
+
+  .series-image {
+    width: 100px;
+    height: 140px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .series-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  .placeholder-image {
+    width: 100%;
+    height: 100%;
+    background-color: #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: #666;
+    border-radius: 6px;
+  }
+
+  .series-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.5rem;
   }
 
   @keyframes flash-own {
