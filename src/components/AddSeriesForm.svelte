@@ -9,7 +9,18 @@
 
   async function handleSubmit(e) {
     e.preventDefault();
-    await addSeries(title, totalVolumes ? parseInt(totalVolumes) : null);
+
+    const parsedTotal = totalVolumes ? parseInt(totalVolumes) : null;
+
+    if (parsedTotal !== null && parsedTotal < 1) {
+      alert("Total volumes must be at least 1.");
+      return;
+    } else if (parsedTotal !== null && parsedTotal > 500) {
+      alert("Input too large!");
+      return;
+    }
+
+    await addSeries(title, parsedTotal);
     title = '';
     totalVolumes = '';
     dispatch('add');
