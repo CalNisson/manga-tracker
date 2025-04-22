@@ -1,5 +1,5 @@
 import { writable, derived } from 'svelte/store';
-import jwt_decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 // Store the token in localStorage for persistence
 export const token = writable(localStorage.getItem('token') || '');
@@ -17,7 +17,7 @@ export const username = derived(token, ($token) => {
   if (!$token) return null;
 
   try {
-    const decoded = jwt_decode($token);
+    const decoded = jwtDecode($token);
     return decoded.sub || null;
   } catch {
     return null;
