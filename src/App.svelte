@@ -97,7 +97,7 @@
   }
 
   .layout-container {
-    width: clamp(300px, 100%, 90rem);
+    min-width: 800px;
     max-width: 100%;
     padding: 0 1rem;
     box-sizing: border-box;
