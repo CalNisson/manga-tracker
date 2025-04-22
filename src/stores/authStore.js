@@ -1,5 +1,7 @@
-import { writable } from 'svelte/store';
+import { writable, derived } from 'svelte/store';
+import jwt_decode from 'jwt-decode';
 
+// Store the token in localStorage for persistence
 export const token = writable(localStorage.getItem('token') || '');
 
 token.subscribe(value => {
@@ -7,5 +9,17 @@ token.subscribe(value => {
     localStorage.setItem('token', value);
   } else {
     localStorage.removeItem('token');
+  }
+});
+
+// 🔍 Derived store that gives us the current username from the token
+export const username = derived(token, ($token) => {
+  if (!$token) return null;
+
+  try {
+    const decoded = jwt_decode($token);
+    return decoded.sub || null;
+  } catch {
+    return null;
   }
 });

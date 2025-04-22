@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { fetchSeries } from './stores/seriesStore';
-  import { token } from './stores/authStore';
+  import { token, username } from './stores/authStore';
   import SeriesList from './components/SeriesList.svelte';
   import AddSeriesForm from './components/AddSeriesForm.svelte';
   import Login from './components/Login.svelte';
@@ -31,7 +31,12 @@
     <div class="layout-container">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <h1>Manga Collection Tracker</h1>
-        <button on:click={logout}>Logout</button>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+          {#if $username}
+            <span>Welcome, {$username}!</span>
+          {/if}
+          <button on:click={logout}>Logout</button>
+        </div>
       </div>
   
       <AddSeriesForm />
