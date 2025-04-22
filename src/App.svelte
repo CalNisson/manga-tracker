@@ -81,6 +81,8 @@
     font-family: system-ui, sans-serif;
     margin: 0;
     background: #f9f9f9;
+    overflow-x: hidden;
+    padding: 0;
   }
   button:disabled {
     opacity: 0.5;
@@ -88,7 +90,8 @@
   }
 
   .layout-container {
-    display: inline-block;
+    min-width: 800px;
+    width: max-content;
     margin: 0 auto;
   }
 
@@ -97,8 +100,10 @@
     box-sizing: border-box;
   }
 
+  .series-entry,
   .series-layout,
   .series-content {
     width: 100%;
-}
+    max-width: 100%;
+  }
 </style>
