@@ -96,14 +96,13 @@
   }
 
   .series-entry {
-    width: 100%;
+    width: auto;
     box-sizing: border-box;
   }
 
   .series-entry,
   .series-layout,
   .series-content {
-    width: 100%;
-    max-width: 100%;
+    width: auto;
   }
 </style>
