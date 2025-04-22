@@ -88,6 +88,8 @@
     background: #f9f9f9;
     overflow-x: hidden;
     padding: 0;
+    width: 100%;
+    box-sizing: border-box;
   }
   button:disabled {
     opacity: 0.5;
@@ -95,8 +97,9 @@
   }
 
   .layout-container {
-    min-width: 800px;
-    width: max-content;
-    margin: 0 auto;
+    width: clamp(300px, 100%, 90rem);
+    max-width: 100%;
+    padding: 0 1rem;
+    box-sizing: border-box;
   }
 </style>
