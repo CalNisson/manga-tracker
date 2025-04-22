@@ -145,7 +145,7 @@
     border-radius: 0.5rem;
     position: relative;
     box-sizing: border-box;
-    overflow-x: hidden;
+    overflow: visible;
   }
 
   .series-layout {
