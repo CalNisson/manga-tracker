@@ -1,0 +1,14 @@
+name: Keep Backend Awake
+
+on:
+  schedule:
+    - cron: "*/14 * * * *" 
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the backend
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" https://manga-collection-backend-0fqi.onrender.com/ping
