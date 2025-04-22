@@ -1,8 +1,9 @@
 import { writable } from 'svelte/store';
 import { token } from './authStore';
+import { backendStarting } from './backendStatus';
+import { API_BASE } from './api.js';
 
 export const seriesStore = writable([]);
-const API_BASE = "https://manga-collection-backend-0fqi.onrender.com";
 
 async function authFetch(url, options = {}) {
   const $token = localStorage.getItem('token');
@@ -13,14 +14,37 @@ async function authFetch(url, options = {}) {
   headers['Content-Type'] = headers['Content-Type'] || 'application/json';
   options.headers = headers;
 
-  console.log("Using token:", $token);
-  return fetch(url, options);
+  const start = Date.now();
+  let wakeNoticeShown = false;
+  const wakeTimeout = setTimeout(() => {
+    backendStarting.set(true);
+    wakeNoticeShown = true;
+  }, 1500);
+
+  try {
+    const res = await fetch(url, options);
+    clearTimeout(wakeTimeout);
+    if (wakeNoticeShown) setTimeout(() => backendStarting.set(false), 3000);
+
+    if (res.status === 401) {
+      token.set('');
+      alert("Session expired. Please log in again.");
+      location.reload();
+      return null;
+    }
+
+    return res;
+  } catch (err) {
+    backendStarting.set(false);
+    console.error("Fetch error:", err);
+    throw err;
+  }
 }
 
 export async function fetchSeries() {
   try {
     const res = await authFetch(`${API_BASE}/series`);
-    if (res.ok) {
+    if (res?.ok) {
       const data = await res.json();
       seriesStore.set(data);
     }
@@ -35,7 +59,7 @@ export async function addSeries(title, totalVolumes) {
     method: 'POST',
     body: JSON.stringify(payload)
   });
-  if (res.ok) fetchSeries();
+  if (res?.ok) fetchSeries();
 }
 
 export async function toggleComplete(id) {
@@ -43,7 +67,7 @@ export async function toggleComplete(id) {
     method: 'PATCH'
   });
 
-  if (res.ok) {
+  if (res?.ok) {
     const updatedSeries = await res.json();
     seriesStore.update(seriesList =>
       seriesList.map(s => s.id === id ? updatedSeries : s)
@@ -58,7 +82,7 @@ export async function toggleOwned(volumeId) {
     method: 'POST'
   });
 
-  if (res.ok) {
+  if (res?.ok) {
     fetchSeries();
   } else {
     console.error('Failed to update volume ownership:', await res.text());
@@ -71,7 +95,7 @@ export async function updateSeries(id, data) {
     body: JSON.stringify(data)
   });
 
-  if (res.ok) {
+  if (res?.ok) {
     const updatedSeries = await res.json();
     seriesStore.update(seriesList =>
       seriesList.map(s => s.id === id ? updatedSeries : s)
@@ -86,7 +110,7 @@ export async function deleteSeriesById(id) {
     method: 'DELETE'
   });
 
-  if (res.ok) {
+  if (res?.ok) {
     seriesStore.update(seriesList => seriesList.filter(s => s.id !== id));
   } else {
     console.error('Failed to delete series:', await res.text());
