@@ -137,11 +137,14 @@
   }
 
   .series-entry {
+    width: 95%;
+    margin: 0 auto;
     border: 1px solid #ccc;
     padding: 1rem;
     margin-bottom: 1rem;
     border-radius: 0.5rem;
     position: relative;
+    box-sizing: border-box;
   }
 
   .series-layout {

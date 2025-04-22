@@ -94,15 +94,4 @@
     width: max-content;
     margin: 0 auto;
   }
-
-  .series-entry {
-    width: 95%;
-    box-sizing: border-box;
-  }
-
-  .series-layout,
-  .series-content {
-    width: 100%;
-    max-width: 100%;
-  }
 </style>
