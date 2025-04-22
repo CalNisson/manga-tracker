@@ -14,7 +14,6 @@ async function authFetch(url, options = {}) {
   headers['Content-Type'] = headers['Content-Type'] || 'application/json';
   options.headers = headers;
 
-  const start = Date.now();
   let wakeNoticeShown = false;
   const wakeTimeout = setTimeout(() => {
     backendStarting.set(true);
@@ -24,17 +23,22 @@ async function authFetch(url, options = {}) {
   try {
     const res = await fetch(url, options);
     clearTimeout(wakeTimeout);
-    if (wakeNoticeShown) setTimeout(() => backendStarting.set(false), 3000);
 
     if (res.status === 401) {
+      backendStarting.set(false);
       token.set('');
       alert("Session expired. Please log in again.");
       location.reload();
       return null;
     }
 
+    if (wakeNoticeShown) {
+      setTimeout(() => backendStarting.set(false), 3000);
+    }
+
     return res;
   } catch (err) {
+    clearTimeout(wakeTimeout);
     backendStarting.set(false);
     console.error("Fetch error:", err);
     throw err;

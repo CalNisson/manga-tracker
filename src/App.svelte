@@ -26,13 +26,30 @@
       fetchSeries();
     }
   });
+
+  let dots = '';
+  let interval;
+
+  $: if ($backendStarting) {
+    let count = 0;
+    interval = setInterval(() => {
+      count = (count + 1) % 4;
+      dots = '.'.repeat(count);
+    }, 500);
+  } else {
+    clearInterval(interval);
+    dots = '';
+  }
 </script>
 
 {#if isLoggedIn}
   <main style="padding: 2rem; max-width: 900px; margin: 0 auto;">
     {#if isWakingUp}
       <div class="overlay">
-        <div class="spinner-message">⚙️ Waking up backend...</div>
+        <div class="spinner-message">
+          <span class="gear">⚙️</span>
+          <span class="message">Waking up backend<span class="dots">{dots}</span></span>
+        </div>        
       </div>
     {/if}
 
@@ -130,4 +147,32 @@
     font-weight: bold;
     color: #333;
   }
+
+  .spinner-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333;
+    animation: fadeIn 0.5s ease-in;
+  }
+
+  .gear {
+    display: inline-block;
+    font-size: 2rem;
+    animation: spin 1s linear infinite;
+    margin-bottom: 0.5rem;
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
 </style>
