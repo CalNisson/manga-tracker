@@ -44,7 +44,7 @@
     {#each series.volumes as v (v.id)}
       <div
         class="volume {v.owned ? 'owned' : ''}"
-        on:click={() => handleToggleOwnership(v.id)}>
+        on:click|stopPropagation={() => handleToggleOwnership(v.id)}>
         Vol. {v.volume_number}
       </div>
     {/each}
@@ -63,17 +63,28 @@
     max-width: 100%;
     box-sizing: border-box;
   }
+  
   .volume {
     padding: 0.5rem 1rem;
     border: 1px solid #aaa;
     border-radius: 4px;
     cursor: pointer;
     user-select: none;
-    transition: background-color 0.2s, color 0.2s;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
+
   .volume.owned {
-    background-color: #4caf50;
+    background: #4ade80;
     color: white;
-    border-color: #4caf50;
   }
+
+  .volume:not(.owned):hover {
+    background-color: #c7d2fe;
+  }
+
+  .volume.owned:hover {
+    background-color: #22c55e;
+    color: white;
+  }
+
 </style>

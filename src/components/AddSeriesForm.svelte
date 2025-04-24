@@ -27,20 +27,22 @@
   }
 </script>
 
-<h2>Add New Series</h2>
-<form on:submit={handleSubmit}>
-  <input type="text" bind:value={title} placeholder="Series title" required />
-  <div class="tooltip-container">
-    <input
-      type="number"
-      bind:value={totalVolumes}
-      placeholder="Total volumes"
-      min="1"
-    />
-    <span class="tooltip-text">Leave blank to autofill volume count</span>
-  </div>
-  <button type="submit">Add Series</button>
-</form>
+<div class="add-series-form">
+  <h2>Add New Series</h2>
+  <form on:submit={handleSubmit}>
+    <input type="text" bind:value={title} placeholder="Series title" required />
+    <div class="tooltip-container">
+      <input
+        type="number"
+        bind:value={totalVolumes}
+        placeholder="Total volumes"
+        min="1"
+      />
+      <span class="tooltip-text">Leave blank to autofill volume count</span>
+    </div>
+    <button type="submit">Add Series</button>
+  </form>
+</div>
 
 <style>
   form {
@@ -80,4 +82,29 @@
     visibility: visible;
     opacity: 1;
   }
+
+  .add-series-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 2rem auto;
+    text-align: center;
+  }
+
+  .add-series-form form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .add-series-form input,
+  .add-series-form button {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+  }
+
 </style>

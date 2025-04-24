@@ -1,1 +1,1 @@
-export const API_BASE = "https://manga-collection-backend-0fqi.onrender.com";
+export const API_BASE = import.meta.env.VITE_API_BASE;

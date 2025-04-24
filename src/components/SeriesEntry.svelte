@@ -82,7 +82,7 @@
   });
 </script>
 
-<div class="series-entry">
+<div class="series-entry" on:click={toggleExpanded}>
   <div class="series-layout">
     <div class="series-image">
       {#if series.image_url}
@@ -93,7 +93,7 @@
     </div>
 
     <div class="series-content">
-      <div class="series-header" on:click={toggleExpanded}>
+      <div class="series-header">
         <h3>{series.title}</h3>
         <span>{ownedCount}/{series.total_volumes || '?'} owned ({percent}%)</span>
         {#if series.completed}
@@ -101,7 +101,13 @@
         {/if}
     
         <div class="menu-container">
-          <button class="menu-button" on:click={toggleMenu}>⋮</button>
+          <button class="menu-button" on:click={toggleMenu} aria-label="Options Menu">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="4" cy="12" r="2" />
+              <circle cx="12" cy="12" r="2" />
+              <circle cx="20" cy="12" r="2" />
+            </svg>
+          </button>
           {#if showMenu}
             <div class="dropdown">
               <div class="dropdown-item" on:click|stopPropagation={editSeries}>✏️ Edit Series</div>
@@ -111,18 +117,24 @@
               <div class="dropdown-item" on:click|stopPropagation={deleteSeries}>🗑️ Delete Series</div>
             </div>
           {/if}
-        </div>
+        </div>        
       </div>
     
       <div class="progress-bar">
         <div class="progress-fill" style="width: {percent}%;"></div>
       </div>
+
+      <div class="expand-toggle" on:click|stopPropagation={toggleExpanded}>
+        <span>{expanded ? '▲' : '▼'} Show Volumes</span>
+      </div>      
     
-      {#if expanded}
-        {#key series.id}
-          <VolumeList series={sortedSeries} on:volumeToggle={e => handleVolumeToggle(e.detail)} />
-        {/key}
-      {/if}
+      <div class="volume-collapse" style="max-height: {expanded ? '1000px' : '0'};">
+        {#if expanded}
+          {#key series.id}
+            <VolumeList series={sortedSeries} on:volumeToggle={e => handleVolumeToggle(e.detail)} />
+          {/key}
+        {/if}
+      </div>
     </div>
   </div>
 </div>
@@ -137,21 +149,31 @@
   }
 
   .series-entry {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     width: 95%;
-    margin: 0 auto;
-    border: 1px solid #ccc;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border-radius: 0.5rem;
-    position: relative;
-    box-sizing: border-box;
-    overflow: visible;
+    margin-inline: auto;
+    cursor: pointer;
+  }
+
+  .series-entry:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+    background-color: #f4f4f4;
+  }
+
+  .series-entry:active {
+    background-color: #eaeaea;
   }
 
   .series-layout {
     display: flex;
     gap: 1rem;
-    align-items: center;
+    align-items: flex-start;
   }
 
   .header {
@@ -184,13 +206,35 @@
   .menu-container {
     position: relative;
   }
+
   .menu-button {
-    background: none;
+    background-color: #f0f0f0;
     border: none;
-    font-size: 1.5rem;
+    border-radius: 50%;
+    padding: 0.5rem;
     cursor: pointer;
-    padding: 0 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    color: #444;
+    width: 2.25rem;
+    height: 2.25rem;
+    z-index: 2;
   }
+
+  .menu-button:hover,
+  .menu-button:focus {
+    background-color: #e0e0e0;
+    transform: scale(1.05);
+  }
+
+  .menu-button svg {
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
   .dropdown {
     position: absolute;
     right: 0;
@@ -256,5 +300,23 @@
     to {
       background-color: #4caf50;
     }
+  }
+
+  .expand-toggle {
+    text-align: center;
+    margin-top: 0.5rem;
+    cursor: pointer;
+    font-weight: bold;
+    color: #555;
+    user-select: none;
+  }
+
+  .expand-toggle:hover {
+    color: #000;
+  }
+
+  .volume-collapse {
+    overflow: hidden;
+    transition: max-height 0.3s ease;
   }
 </style>
