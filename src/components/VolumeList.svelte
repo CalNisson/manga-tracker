@@ -62,6 +62,7 @@
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+    animation: slideFadeIn 0.3s ease-out;
   }
   
   .volume {
@@ -71,10 +72,11 @@
     cursor: pointer;
     user-select: none;
     transition: background-color 0.3s ease, color 0.3s ease;
+    background: #ffffff;
   }
 
   .volume.owned {
-    background: #4ade80;
+    background: #38a169;
     color: white;
   }
 
@@ -83,8 +85,19 @@
   }
 
   .volume.owned:hover {
-    background-color: #22c55e;
+    background-color: #2f855a;
     color: white;
+  }
+
+  @keyframes slideFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
 </style>

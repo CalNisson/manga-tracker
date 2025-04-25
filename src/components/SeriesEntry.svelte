@@ -149,16 +149,19 @@
   }
 
   .series-entry {
-    background: white;
+    background: linear-gradient(145deg, #fff0ec, #ffe0dc);
     border-radius: 16px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     width: 95%;
     margin-inline: auto;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
   }
+
 
   .series-entry:hover {
     transform: translateY(-4px);

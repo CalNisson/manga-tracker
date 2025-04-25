@@ -145,7 +145,7 @@
 
   h1 {
     font-size: 2.25rem;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    background: #2e2e2e;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin: 0;
@@ -269,7 +269,6 @@
     user-select: none;
     overflow: hidden;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    margin-bottom: 1rem;
     font-weight: bold;
   }
 
@@ -279,7 +278,7 @@
     left: 0;
     width: 50%;
     height: 100%;
-    background-color: #4f46e5;
+    background-color: #ff6b6b;
     border-radius: 999px;
     transition: transform 0.3s ease;
     z-index: 0;

@@ -1,7 +1,7 @@
 body {
   margin: 0;
   font-family: system-ui, sans-serif;
-  background-color: #f9f9f9;
+  background-color: #fff8f6;
   color: #333;
 }
 
@@ -13,14 +13,13 @@ input, button, select {
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
-  background: linear-gradient(to bottom right, #f3f4f6, #e5e7eb);
   color: #333;
   padding: 0;
   box-sizing: border-box;
 }
 
 button {
-  background-color: #4f46e5;
+  background-color: #ff6b6b;
   color: white;
   padding: 0.5rem 1rem;
   border: none;
@@ -31,7 +30,7 @@ button {
 }
 
 button:hover {
-  background-color: #4338ca;
+  background-color: #ffa07a;
   transform: translateY(-2px);
 }
 
