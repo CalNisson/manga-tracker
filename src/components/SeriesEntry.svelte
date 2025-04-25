@@ -128,7 +128,7 @@
         <span>{expanded ? '▲' : '▼'} Show Volumes</span>
       </div>      
     
-      <div class="volume-collapse" style="max-height: {expanded ? '1000px' : '0'};">
+      <div class="volume-collapse" style="max-height: {expanded ? '10000px' : '0'};">
         {#if expanded}
           {#key series.id}
             <VolumeList series={sortedSeries} on:volumeToggle={e => handleVolumeToggle(e.detail)} />
