@@ -13,7 +13,6 @@
 
   const dispatch = createEventDispatcher();
 
-  // Prevent expansion toggle if menu is clicked
   function toggleExpanded(event) {
     if (event.target.closest('.menu-container')) return;
     expanded = !expanded;
@@ -63,7 +62,7 @@
   };
 
   function toggleMenu(event) {
-    event.stopPropagation(); // Stop click from bubbling to header
+    event.stopPropagation();
     showMenu = !showMenu;
   }
 
