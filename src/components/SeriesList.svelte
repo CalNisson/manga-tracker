@@ -1,8 +1,10 @@
 <script>
   import { seriesStore } from '../stores/seriesStore';
   import { deleteSeriesById } from '../stores/seriesStore.js';
-  import EditSeriesModal from './EditSeriesModal.svelte';
+  import { isMobile } from '../stores/screenStore.js';
   import SeriesEntry from './SeriesEntry.svelte';
+  import MobileSeriesEntry from './MobileSeriesEntry.svelte';
+  import EditSeriesModal from './EditSeriesModal.svelte';
   import { onDestroy } from 'svelte';
 
   export let filterCompleted = false;
@@ -11,10 +13,10 @@
 
   let seriesData = [];
   let filteredSeries = [];
+  let selectedSeries = null;
   let unsubscribe = seriesStore.subscribe(data => {
     seriesData = data;
   });
-  let selectedSeries = null;
 
   function openEditModal(series) {
     selectedSeries = series;
@@ -29,7 +31,6 @@
     seriesData = seriesData.filter(s => s.id !== seriesToDelete.id);
     filteredSeries = filteredSeries.filter(s => s.id !== seriesToDelete.id);
   }
-
 
   onDestroy(() => unsubscribe());
 
@@ -46,6 +47,8 @@
       if (sortBy === 'percent') return percentB - percentA;
       return a.title.localeCompare(b.title);
     });
+
+  $: EntryComponent = $isMobile ? MobileSeriesEntry : SeriesEntry;
 </script>
 
 <h2 style="margin-bottom: 1rem;">{filterCompleted ? 'Complete' : 'Incomplete'} Series</h2>
@@ -54,10 +57,12 @@
   <p>No series found.</p>
 {:else}
   {#each filteredSeries as series (series.id)}
-    <SeriesEntry 
-      {series} 
+    <svelte:component
+      this={EntryComponent}
+      {series}
       on:edit={(e) => openEditModal(e.detail)}
-      on:delete={(e) => handleDeleteSeries(e.detail)} />
+      on:delete={(e) => handleDeleteSeries(e.detail)}
+    />
   {/each}
 {/if}
 

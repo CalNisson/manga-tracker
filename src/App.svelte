@@ -8,6 +8,7 @@
   import AddSeriesForm from './components/AddSeriesForm.svelte';
   import Login from './components/Login.svelte';
   import Register from './components/Register.svelte';
+  import { isMobile } from './stores/screenStore.js';
 
   let searchTerm = '';
   let sortBy = 'alpha';
@@ -56,7 +57,13 @@
 
     <div class="layout-container">
       <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h1>Manga Collection Tracker</h1>
+        <a href="/" class="logo-link">
+          {#if $isMobile}
+            <img src="/images/manga_collector_logo_mobile.png" alt="Logo" class="logo" />
+          {:else}
+            <img src="/images/manga_collector_logo.png" alt="Logo" class="logo" />
+          {/if}
+        </a>
         <div style="display: flex; align-items: center; gap: 1rem;">
           {#if $username}
             <span>Welcome, {$username}!</span>
@@ -104,7 +111,13 @@
   </main>
 {:else}
   <main style="padding: 2rem; max-width: 400px; margin: 0 auto;">
-    <h1>Manga Collection Tracker</h1>
+    <a href="/" class="logo-link">
+      {#if $isMobile}
+        <img src="/images/manga_collector_logo_mobile.png" alt="Logo" class="logo" />
+      {:else}
+        <img src="/images/manga_collector_logo.png" alt="Logo" class="logo" />
+      {/if}
+    </a>
     {#if isWakingUp}
       <div class="overlay">
         <div class="spinner-message">⚙️ Waking up backend...</div>

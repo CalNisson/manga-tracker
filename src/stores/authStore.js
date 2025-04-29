@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 // Store the token in localStorage for persistence
 export const token = writable(localStorage.getItem('token') || '');
 
-token.subscribe(value => {
+token.subscribe((value) => {
   if (value) {
     localStorage.setItem('token', value);
   } else {

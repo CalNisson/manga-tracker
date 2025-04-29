@@ -7,7 +7,7 @@ export const seriesStore = writable([]);
 
 async function authFetch(url, options = {}) {
   const $token = localStorage.getItem('token');
-  if (!$token) throw new Error("Not authenticated");
+  if (!$token) throw new Error('Not authenticated');
 
   const headers = options.headers || {};
   headers['Authorization'] = `Bearer ${$token}`;
@@ -27,7 +27,7 @@ async function authFetch(url, options = {}) {
     if (res.status === 401) {
       backendStarting.set(false);
       token.set('');
-      alert("Session expired. Please log in again.");
+      alert('Session expired. Please log in again.');
       location.reload();
       return null;
     }
@@ -40,7 +40,7 @@ async function authFetch(url, options = {}) {
   } catch (err) {
     clearTimeout(wakeTimeout);
     backendStarting.set(false);
-    console.error("Fetch error:", err);
+    console.error('Fetch error:', err);
     throw err;
   }
 }
@@ -61,21 +61,19 @@ export async function addSeries(title, totalVolumes) {
   const payload = { title, total_volumes: totalVolumes };
   const res = await authFetch(`${API_BASE}/series`, {
     method: 'POST',
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   });
   if (res?.ok) fetchSeries();
 }
 
 export async function toggleComplete(id) {
   const res = await authFetch(`${API_BASE}/series/${id}/toggle_complete`, {
-    method: 'PATCH'
+    method: 'PATCH',
   });
 
   if (res?.ok) {
     const updatedSeries = await res.json();
-    seriesStore.update(seriesList =>
-      seriesList.map(s => s.id === id ? updatedSeries : s)
-    );
+    seriesStore.update((seriesList) => seriesList.map((s) => (s.id === id ? updatedSeries : s)));
   } else {
     console.error('Failed to toggle complete:', await res.text());
   }
@@ -83,7 +81,7 @@ export async function toggleComplete(id) {
 
 export async function toggleOwned(volumeId) {
   const res = await authFetch(`${API_BASE}/volumes/${volumeId}/toggle`, {
-    method: 'POST'
+    method: 'POST',
   });
 
   if (res?.ok) {
@@ -96,14 +94,12 @@ export async function toggleOwned(volumeId) {
 export async function updateSeries(id, data) {
   const res = await authFetch(`${API_BASE}/series/${id}/update_total`, {
     method: 'PATCH',
-    body: JSON.stringify(data)
+    body: JSON.stringify(data),
   });
 
   if (res?.ok) {
     const updatedSeries = await res.json();
-    seriesStore.update(seriesList =>
-      seriesList.map(s => s.id === id ? updatedSeries : s)
-    );
+    seriesStore.update((seriesList) => seriesList.map((s) => (s.id === id ? updatedSeries : s)));
   } else {
     console.error('Failed to update series:', await res.text());
   }
@@ -111,11 +107,11 @@ export async function updateSeries(id, data) {
 
 export async function deleteSeriesById(id) {
   const res = await authFetch(`${API_BASE}/series/${id}`, {
-    method: 'DELETE'
+    method: 'DELETE',
   });
 
   if (res?.ok) {
-    seriesStore.update(seriesList => seriesList.filter(s => s.id !== id));
+    seriesStore.update((seriesList) => seriesList.filter((s) => s.id !== id));
   } else {
     console.error('Failed to delete series:', await res.text());
   }

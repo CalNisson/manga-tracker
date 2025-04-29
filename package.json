@@ -8,13 +8,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "svelte": "^4.2.8",
-    "jwt-decode": "^4.0.0"
+    "jwt-decode": "^4.0.0",
+    "svelte": "^4.2.8"
   },
   "devDependencies": {
-    "vite": "^5.2.0",
+    "@sveltejs/adapter-static": "3.0.8",
     "@sveltejs/vite-plugin-svelte": "^3.1.2",
-    "@sveltejs/adapter-static": "3.0.8"
+    "prettier": "^3.5.3",
+    "vite": "^5.2.0"
   },
   "resolutions": {
     "rollup": "npm:@rollup/wasm-node@*"
