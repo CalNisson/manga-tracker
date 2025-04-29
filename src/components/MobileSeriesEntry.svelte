@@ -20,6 +20,11 @@
     }
   });
 
+  $: sortedSeries = {
+    ...series,
+    volumes: [...(series.volumes || [])].sort((a, b) => a.volume_number - b.volume_number),
+  };
+
   function toggleExpanded(event) {
     expanded = !expanded;
   }
@@ -114,7 +119,7 @@
   <div class="volume-collapse" style="max-height: {expanded ? '10000px' : '0'};">
     {#if expanded}
       {#key series.id}
-        <VolumeList {series} on:volumeToggle={(e) => handleVolumeToggle(e.detail)} />
+        <VolumeList series={sortedSeries} on:volumeToggle={(e) => handleVolumeToggle(e.detail)} />
       {/key}
     {/if}
   </div>
