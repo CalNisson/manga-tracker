@@ -59,7 +59,7 @@
 
     <div class="layout-container">
       <div style="display: flex; justify-content: space-between; align-items: center;">
-        <a href="/" class="logo-link">
+        <a href="{basePath}" class="logo-link">
           {#if $isMobile}
             <img src={`${basePath}/images/manga_collector_logo_mobile.png`} alt="Logo" class="logo" />
           {:else}
@@ -113,7 +113,7 @@
   </main>
 {:else}
   <main style="padding: 2rem; max-width: 400px; margin: 0 auto;">
-    <a href="/" class="logo-link">
+    <a href="{basePath}" class="logo-link">
       {#if $isMobile}
         <img src={`${basePath}/images/manga_collector_logo_mobile.png`} alt="Logo" class="logo" />
       {:else}

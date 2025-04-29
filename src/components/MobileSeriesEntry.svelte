@@ -20,10 +20,18 @@
     }
   });
 
-  $: sortedSeries = {
-    ...series,
-    volumes: [...(series.volumes || [])].sort((a, b) => a.volume_number - b.volume_number),
-  };
+  $: sortedSeries = (() => {
+    if (!series.volumes || series.volumes.length === 0) return series;
+    const isSorted = series.volumes.every((v, i, arr) => {
+      return i === 0 || arr[i - 1].volume_number <= v.volume_number;
+    });
+    return isSorted
+      ? series
+      : {
+          ...series,
+          volumes: [...series.volumes].sort((a, b) => a.volume_number - b.volume_number),
+        };
+  })();
 
   function toggleExpanded(event) {
     expanded = !expanded;
