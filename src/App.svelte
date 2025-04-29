@@ -61,11 +61,11 @@
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <a href="/" class="logo-link">
           {#if $isMobile}
-            <img src="{basePath}/images/manga_collector_logo_mobile.png" alt="Logo" class="logo" />
+            <img src={`${basePath}/images/manga_collector_logo_mobile.png`} alt="Logo" class="logo" />
           {:else}
-            <img src="{basePath}/images/manga_collector_logo.png" alt="Logo" class="logo" />
+            <img src={`${basePath}/images/manga_collector_logo.png`} alt="Logo" class="logo" />
           {/if}
-        </a>
+        </a> 
         <div style="display: flex; align-items: center; gap: 1rem;">
           {#if $username}
             <span>Welcome, {$username}!</span>
@@ -115,11 +115,11 @@
   <main style="padding: 2rem; max-width: 400px; margin: 0 auto;">
     <a href="/" class="logo-link">
       {#if $isMobile}
-        <img src="{basePath}/images/manga_collector_logo_mobile.png" alt="Logo" class="logo" />
+        <img src={`${basePath}/images/manga_collector_logo_mobile.png`} alt="Logo" class="logo" />
       {:else}
-        <img src="{basePath}/images/manga_collector_logo.png" alt="Logo" class="logo" />
+        <img src={`${basePath}/images/manga_collector_logo.png`} alt="Logo" class="logo" />
       {/if}
-    </a>
+    </a>    
     {#if isWakingUp}
       <div class="overlay">
         <div class="spinner-message">⚙️ Waking up backend...</div>
