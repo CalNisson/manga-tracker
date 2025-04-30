@@ -67,7 +67,7 @@
 
       if (!$seriesStore || $seriesStore.length === 0) {
         console.warn('No series data — redirecting to Home.');
-        window.location.href = import.meta.env.BASE_URL;
+        window.location.href = `${window.location.origin}${import.meta.env.BASE_URL}`;
         return;
       }
 
