@@ -116,3 +116,15 @@ export async function deleteSeriesById(id) {
     console.error('Failed to delete series:', await res.text());
   }
 }
+
+export async function fetchMalMetadata(mal_id) {
+  try {
+    const res = await authFetch(`${API_BASE}/series/${mal_id}/mal_info`);
+    if (res.ok) {
+      return await res.json();  // { score, genres }
+    }
+  } catch (err) {
+    console.error('Failed to fetch MAL metadata:', err);
+    return null;
+  }
+}

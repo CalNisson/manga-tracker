@@ -1,0 +1,223 @@
+<script>
+  import { onMount } from 'svelte';
+  import { fetchSeries } from '../stores/seriesStore';
+  import { backendStarting } from '../stores/backendStatus';
+  import { seriesStore } from '../stores/seriesStore';
+  import AddSeriesForm from '../components/AddSeriesForm.svelte';
+  import SeriesList from '../components/SeriesList.svelte';
+
+  let searchTerm = '';
+  let sortBy = 'alpha';
+  let showCompleted = false;
+
+  $: isWakingUp = $backendStarting;
+
+  onMount(() => {
+    fetchSeries();
+  });
+
+  let dots = '';
+  let interval;
+
+  $: if ($backendStarting) {
+    let count = 0;
+    interval = setInterval(() => {
+      count = (count + 1) % 4;
+      dots = '.'.repeat(count);
+    }, 500);
+  } else {
+    clearInterval(interval);
+    dots = '';
+  }
+</script>
+
+<main style="padding: 2rem; max-width: 900px; margin: 0 auto;">
+  {#if isWakingUp}
+    <div class="overlay">
+      <div class="spinner-message">
+        <span class="gear">⚙️</span>
+        <span class="message">Waking up backend<span class="dots">{dots}</span></span>
+      </div>
+    </div>
+  {/if}
+
+  <AddSeriesForm />
+
+  <div class="filter-bar">
+    <div class="toggle-switch" on:click={() => (showCompleted = !showCompleted)}>
+      <div class="slider" class:right={showCompleted}></div>
+      <div class="label left" class:active={!showCompleted}>Incomplete</div>
+      <div class="label right" class:active={showCompleted}>Complete</div>
+    </div>
+
+    <input
+      type="text"
+      placeholder="Search..."
+      bind:value={searchTerm}
+      style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ccc;"
+    />
+
+    <select
+      bind:value={sortBy}
+      style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ccc;"
+    >
+      <option value="alpha">Alphabetical</option>
+      <option value="total">Total Volumes</option>
+      <option value="owned">Volumes Owned</option>
+      <option value="percent">% Owned</option>
+    </select>
+  </div>
+
+  {#if $seriesStore.length > 0}
+    <div class="owned-count">
+      <span
+        >📚 Total Volumes Owned: <strong
+          >{$seriesStore.reduce((sum, s) => {
+            return sum + (s.volumes?.filter((v) => v.owned).length || 0);
+          }, 0)}</strong
+        ></span
+      >
+    </div>
+  {/if}
+
+  <SeriesList filterCompleted={showCompleted} {searchTerm} {sortBy} />
+</main>
+
+<style>
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .spinner-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeIn 0.5s ease-in;
+  }
+
+  .gear {
+    font-size: 2rem;
+    animation: spin 1s linear infinite;
+    margin-bottom: 0.5rem;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .filter-bar {
+    background: white;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    margin: 2rem auto;
+    max-width: 900px;
+  }
+
+  .toggle-switch {
+    position: relative;
+    display: flex;
+    width: 200px;
+    height: 40px;
+    background: #e4e4e7;
+    border-radius: 999px;
+    cursor: pointer;
+    overflow: hidden;
+    font-weight: bold;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .toggle-switch .slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background-color: #ff6b6b;
+    border-radius: 999px;
+    transition: transform 0.3s ease;
+    z-index: 0;
+  }
+
+  .toggle-switch .slider.right {
+    transform: translateX(100%);
+  }
+
+  .toggle-switch .label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    z-index: 1;
+    transition: color 0.3s ease;
+  }
+
+  .toggle-switch .label.active {
+    color: white;
+  }
+
+  .label {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+    transition: color 0.3s ease;
+  }
+
+  .label.active {
+    color: white;
+  }
+
+  .owned-count {
+    background: linear-gradient(90deg, #f6d365, #fda085);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin: 1.5rem auto;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    width: fit-content;
+    animation: fadeInOwned 0.6s ease-in-out;
+    transition: transform 0.2s ease;
+  }
+
+  .owned-count:hover {
+    transform: scale(1.05);
+    cursor: default;
+  }
+
+  @keyframes fadeInOwned {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
