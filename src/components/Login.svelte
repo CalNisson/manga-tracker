@@ -17,7 +17,8 @@
     if (res.ok) {
       const data = await res.json();
       token.set(data.access_token);
-      location.reload(); // refresh to load series
+      location.reload();
+      window.location.href = '/';
     } else {
       const msg = await res.json();
       error = msg.detail || 'Login failed';

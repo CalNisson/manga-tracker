@@ -65,6 +65,12 @@
         });
       });
 
+      if (!$seriesStore || $seriesStore.length === 0) {
+        console.warn('No series data — redirecting to Home.');
+        window.location.href = '/';
+        return;
+      }
+
       allSeries = $seriesStore.filter((s) => s.mal_id);
       const ownedMalIds = new Set(allSeries.map((s) => s.mal_id));
       console.log('Series considered for recommendations:', allSeries);
