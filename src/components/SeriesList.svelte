@@ -48,9 +48,9 @@
       const percentA = a.total_volumes ? ownedA / a.total_volumes : 0;
       const percentB = b.total_volumes ? ownedB / b.total_volumes : 0;
 
-      if (sortBy === 'total') return sortAsc ? (a.total_volumes || 0) - (b.total_volumes || 0) : (b.total_volumes || 0) - (a.total_volumes || 0);
-      if (sortBy === 'owned') return sortAsc ? ownedA - ownedB : ownedB - ownedA;
-      if (sortBy === 'percent') return sortAsc ? percentA - percentB : percentB - percentA;
+      if (sortBy === 'total') return !sortAsc ? (a.total_volumes || 0) - (b.total_volumes || 0) : (b.total_volumes || 0) - (a.total_volumes || 0);
+      if (sortBy === 'owned') return !sortAsc ? ownedA - ownedB : ownedB - ownedA;
+      if (sortBy === 'percent') return !sortAsc ? percentA - percentB : percentB - percentA;
       if (sortBy === 'score') {
         const scoreA = a.score ?? -1;
         const scoreB = b.score ?? -1;
