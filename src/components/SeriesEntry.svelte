@@ -151,7 +151,7 @@
       </div>
 
       <div class="expand-toggle" on:click|stopPropagation={toggleExpanded}>
-        <span>{expanded ? '▲' : '▼'} Show Volumes</span>
+        {expanded ? '▲ Hide Volumes' : '▼ Show Volumes'}
       </div>      
     
       <div class="volume-collapse" style="max-height: {expanded ? '10000px' : '0'};">
