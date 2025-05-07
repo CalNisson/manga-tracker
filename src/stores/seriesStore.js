@@ -57,14 +57,22 @@ export async function fetchSeries() {
   }
 }
 
-export async function addSeries(title, totalVolumes) {
-  const payload = { title, total_volumes: totalVolumes };
+export async function addSeries(title, totalVolumes, score = null, tags = []) {
+  const payload = {
+    title,
+    total_volumes: totalVolumes,
+    score,
+    tags
+  };
+
   const res = await authFetch(`${API_BASE}/series`, {
     method: 'POST',
     body: JSON.stringify(payload),
   });
+
   if (res?.ok) fetchSeries();
 }
+
 
 export async function toggleComplete(id) {
   const res = await authFetch(`${API_BASE}/series/${id}/toggle_complete`, {
@@ -92,7 +100,8 @@ export async function toggleOwned(volumeId) {
 }
 
 export async function updateSeries(id, data) {
-  const res = await authFetch(`${API_BASE}/series/${id}/update_total`, {
+  console.log("Updating series:", id, data);
+  const res = await authFetch(`${API_BASE}/series/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(data),
   });

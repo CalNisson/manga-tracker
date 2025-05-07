@@ -10,6 +10,8 @@
   export let filterCompleted = false;
   export let searchTerm = '';
   export let sortBy = 'alpha';
+  export let selectedTag = '';
+  export let sortAsc = true;
 
   let seriesData = [];
   let filteredSeries = [];
@@ -35,17 +37,27 @@
   onDestroy(() => unsubscribe());
 
   $: filteredSeries = seriesData
-    .filter(s => s.completed === filterCompleted && s.title.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter(s =>
+      s.completed === filterCompleted &&
+      s.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (!selectedTag || (s.tags || []).includes(selectedTag))
+    )
     .sort((a, b) => {
       const ownedA = (a.volumes || []).filter(v => v.owned).length;
       const ownedB = (b.volumes || []).filter(v => v.owned).length;
       const percentA = a.total_volumes ? ownedA / a.total_volumes : 0;
       const percentB = b.total_volumes ? ownedB / b.total_volumes : 0;
 
-      if (sortBy === 'total') return (b.total_volumes || 0) - (a.total_volumes || 0);
-      if (sortBy === 'owned') return ownedB - ownedA;
-      if (sortBy === 'percent') return percentB - percentA;
-      return a.title.localeCompare(b.title);
+      if (sortBy === 'total') return sortAsc ? (a.total_volumes || 0) - (b.total_volumes || 0) : (b.total_volumes || 0) - (a.total_volumes || 0);
+      if (sortBy === 'owned') return sortAsc ? ownedA - ownedB : ownedB - ownedA;
+      if (sortBy === 'percent') return sortAsc ? percentA - percentB : percentB - percentA;
+      if (sortBy === 'score') {
+        const scoreA = a.score ?? -1;
+        const scoreB = b.score ?? -1;
+        if (scoreA !== scoreB) return !sortAsc ? scoreA - scoreB : scoreB - scoreA;
+        return a.title.localeCompare(b.title);
+      }
+      return sortAsc ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title);
     });
 
   $: EntryComponent = $isMobile ? MobileSeriesEntry : SeriesEntry;

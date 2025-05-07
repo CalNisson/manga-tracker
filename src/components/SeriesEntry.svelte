@@ -72,6 +72,14 @@
     }
   }
 
+  function getScoreColor(score) {
+    const clamped = Math.max(0, Math.min(score, 10));
+    const hue = (clamped / 10) * 120;
+    const saturation = 50;
+    const lightness = 55 - (clamped - 5) ** 2 * 0.3;
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  }
+
   onMount(() => {
     document.addEventListener('click', handleClickOutside);
   });
@@ -88,6 +96,17 @@
         <img src={series.image_url} alt={`Cover for ${series.title}`} />
       {:else}
         <div class="placeholder-image">No Image</div>
+      {/if}
+      {#if series.score != null}
+        <div class="series-score">
+          Score:
+          <span
+            class="score-value"
+            style="color: {getScoreColor(series.score)}"
+          >
+            {Number(series.score).toFixed(2)}
+          </span>
+        </div>
       {/if}
     </div>
 
@@ -118,6 +137,14 @@
           {/if}
         </div>        
       </div>
+
+      {#if series.tags && series.tags.length > 0}
+        <div class="tag-list">
+          {#each series.tags as tag}
+            <span class="tag">{tag}</span>
+          {/each}
+        </div>
+      {/if}
     
       <div class="progress-bar">
         <div class="progress-fill" style="width: {percent}%;"></div>
@@ -263,14 +290,16 @@
 
   .series-image {
     width: 100px;
-    height: 140px;
     flex-shrink: 0;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
   }
 
   .series-image img {
     width: 100%;
-    height: 100%;
+    height: auto;
     object-fit: cover;
     border-radius: 6px;
   }
@@ -321,4 +350,33 @@
     overflow: hidden;
     transition: max-height 0.3s ease;
   }
+
+  .series-score {
+    font-size: 0.85rem;
+    color: #555;
+    text-align: center;
+  }
+
+  .score-value {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-left: 0.25rem;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.25rem 0 0.5rem 0;
+  }
+
+  .tag {
+    background-color: #ffd9d4;
+    color: #333;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
 </style>

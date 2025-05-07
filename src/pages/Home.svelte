@@ -9,6 +9,9 @@
   let searchTerm = '';
   let sortBy = 'alpha';
   let showCompleted = false;
+  let selectedTag = '';
+  let allTags = [];
+  let sortAsc = true;
 
   $: isWakingUp = $backendStarting;
 
@@ -28,6 +31,14 @@
   } else {
     clearInterval(interval);
     dots = '';
+  }
+
+  $: {
+    const tagSet = new Set();
+    $seriesStore.forEach(series => {
+      (series.tags || []).forEach(tag => tagSet.add(tag));
+    });
+    allTags = Array.from(tagSet).sort();
   }
 </script>
 
@@ -57,15 +68,28 @@
       style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ccc;"
     />
 
-    <select
-      bind:value={sortBy}
-      style="padding: 0.5rem; border-radius: 4px; border: 1px solid #ccc;"
-    >
-      <option value="alpha">Alphabetical</option>
-      <option value="total">Total Volumes</option>
-      <option value="owned">Volumes Owned</option>
-      <option value="percent">% Owned</option>
-    </select>
+    <div class="sort-group">
+      <select bind:value={sortBy}>
+        <option value="alpha">Alphabetical</option>
+        <option value="total">Total Volumes</option>
+        <option value="owned">Volumes Owned</option>
+        <option value="percent">% Owned</option>
+        <option value="score">Score</option>
+      </select>
+
+      <button class="sort-toggle" on:click={() => (sortAsc = !sortAsc)}>
+        <svg viewBox="0 0 24 24" class:rotated={!sortAsc}>
+          <path d="M12 15.5l-7-7 1.41-1.41L12 12.67l5.59-5.58L19 8.5l-7 7z" />
+        </svg>        
+      </button>
+    </div>    
+
+    <select bind:value={selectedTag}>
+      <option value="">All Tags</option>
+      {#each allTags as tag}
+        <option value={tag}>{tag}</option>
+      {/each}
+    </select>    
   </div>
 
   {#if $seriesStore.length > 0}
@@ -80,7 +104,7 @@
     </div>
   {/if}
 
-  <SeriesList filterCompleted={showCompleted} {searchTerm} {sortBy} />
+  <SeriesList filterCompleted={showCompleted} {searchTerm} {sortBy} {selectedTag} {sortAsc} />
 </main>
 
 <style>
@@ -208,6 +232,49 @@
   .owned-count:hover {
     transform: scale(1.05);
     cursor: default;
+  }
+
+  .sort-group {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    overflow: hidden;
+    background: white;
+    height: 40px;
+    transition: box-shadow 0.2s ease;
+  }
+
+  .sort-group:focus-within {
+    box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.5);
+  }
+
+  .sort-group select,
+  .sort-toggle {
+    all: unset;
+    padding: 0 0.75rem;
+    font-size: 0.95rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    background-color: white;
+  }
+
+  .sort-toggle {
+    border-left: 1px solid #ccc;
+  }
+
+  .sort-toggle svg {
+    width: 18px;
+    height: 18px;
+    fill: #444; /* Darker arrow for visibility */
+    transition: transform 0.25s ease;
+  }
+
+  .sort-toggle svg.rotated {
+    transform: rotate(180deg);
   }
 
   @keyframes fadeInOwned {
