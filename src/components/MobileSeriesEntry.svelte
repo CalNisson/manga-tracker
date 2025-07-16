@@ -1,4 +1,5 @@
 <script>
+  import { toggleComplete } from '../stores/seriesStore';
   import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import VolumeList from './VolumeList.svelte';
   import { progressMap } from '../stores/progressStore.js';
@@ -37,6 +38,11 @@
     expanded = !expanded;
   }
 
+  async function toggleCompleteStatus() {
+    await toggleComplete(series.id);
+    showMenu = false;
+  }
+  
   function handleVolumeToggle(volumeId) {
     series = {
       ...series,
@@ -119,12 +125,9 @@
       {#if showMenu}
         <div class="dropdown">
           <div class="dropdown-item" on:click|stopPropagation={handleEdit}>✏️ Edit Series</div>
-          <div
-            class="dropdown-item"
-            on:click|stopPropagation={() => dispatch('toggleComplete', series)}
-          >
-            {series.completed ? '❌ Mark Incomplete' : '✅ Mark Complete'}
-          </div>
+          <div class="dropdown-item" on:click|stopPropagation={toggleCompleteStatus}>
+                {series.completed ? '❌ Mark Incomplete' : '✅ Mark Complete'}
+              </div>
           <div class="dropdown-item" on:click|stopPropagation={handleDelete}>🗑️ Delete Series</div>
         </div>
       {/if}
