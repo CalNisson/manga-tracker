@@ -6,13 +6,14 @@
     import Router from 'svelte-spa-router';
     import Home from './pages/Home.svelte';
     import Recommendations from './pages/Recommendations.svelte';
+    import CollectionSummary from './pages/CollectionSummary.svelte';
   
     let currentView = 'login';
     $: isLoggedIn = $token.length > 0;
   
     const routes = {
       '/': Home,
-      '/recommendations': Recommendations
+      '/summary': CollectionSummary
     };
   
     function logout() {
@@ -40,7 +41,8 @@
   
       <nav class="navbar">
         <a href="#/" class="nav-link">Home</a>
-        <a href="#/recommendations" class="nav-link">Recommendations</a>
+        <a href="#/summary" class="nav-link">Summary</a>
+        <!-- <a href="#/recommendations" class="nav-link">Recommendations</a> -->
       </nav>
     </header>
   
