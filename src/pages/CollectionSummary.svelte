@@ -9,37 +9,44 @@
 
   const maxDisplayVolumes = 56;
   const baseTileSize = 20; // px
-  const baseGap = 3;       // px
-  const maxGridWidth = (baseTileSize * 8) + (baseGap * 7); // 181px
-  const maxGridHeight = (baseTileSize * 7) + (baseGap * 6); // 158px
-
-  const layoutCache = new Map();
 
   function getVolumeLayout(series) {
     const count = series.volumes?.length || 0;
-    const cacheKey = `${series.id}-${count}`;
-    if (layoutCache.has(cacheKey)) return layoutCache.get(cacheKey);
 
-    let layout;
-    if (count <= maxDisplayVolumes) {
-      layout = { columns: 8, size: baseTileSize, gap: baseGap };
-    } else {
-      const rows = 7;
-      const columns = Math.ceil(count / rows);
-      const options = [3, 2].map(gap => {
-        const tileW = (maxGridWidth - (columns - 1) * gap) / columns;
-        const tileH = (maxGridHeight - (rows - 1) * gap) / rows;
-        const size = Math.floor(Math.min(tileW, tileH));
-        return { columns, size, gap };
-      });
-      const valid = options.filter(opt => opt.size >= 10);
-      layout = valid.length > 0
-        ? valid.sort((a, b) => b.size - a.size)[0]
-        : { columns, size: 10, gap: baseGap };
+    if (count <= 56) {
+      return { columns: 8, size: 20, gap: 3 };
     }
 
-    layoutCache.set(cacheKey, layout);
-    return layout;
+    const MAX_WIDTH = 186;
+    const MAX_HEIGHT = 163;
+    const MIN_TILE_SIZE = 10;
+    const MAX_COLUMNS = 30;
+    const GAP_OPTIONS = [3, 2, 1];
+
+    let best = null;
+
+    for (const gap of GAP_OPTIONS) {
+      for (let columns = 8; columns <= Math.min(count, MAX_COLUMNS); columns++) {
+        const rows = Math.ceil(count / columns);
+
+        const totalGapWidth = (columns - 1) * gap;
+        const totalGapHeight = (rows - 1) * gap;
+
+        const maxTileW = Math.floor((MAX_WIDTH - totalGapWidth) / columns);
+        const maxTileH = Math.floor((MAX_HEIGHT - totalGapHeight) / rows);
+        const tileSize = Math.min(maxTileW, maxTileH);
+
+        if (tileSize >= MIN_TILE_SIZE) {
+          if (!best || tileSize > best.size || (tileSize === best.size && columns > best.columns)) {
+            best = { columns, size: tileSize, gap };
+          }
+        }
+      }
+
+      if (best) break;
+    }
+
+    return best || { columns: 20, size: MIN_TILE_SIZE, gap: 1 };
   }
 
   onMount(() => {
@@ -123,6 +130,7 @@
     align-items: center;
     width: 100px;
     flex-shrink: 0;
+    padding-left: 5px;
   }
 
   .cover {
