@@ -1,13 +1,34 @@
 <script>
   import { seriesStore } from "../stores/seriesStore";
-  import { derived } from "svelte/store";
+  import { derived, writable } from "svelte/store";
+  import { onDestroy } from "svelte";
 
-  // Derive the total owned count
-  const totalOwned = derived(seriesStore, ($seriesStore) => {
-    return $seriesStore.reduce((sum, s) => {
-      return sum + (s.volumes?.filter((v) => v.owned).length || 0);
-    }, 0);
+  export let seriesData = null;
+
+  const effectiveSeries = writable([]);
+
+  let unsubscribe = null;
+
+  // Reactive update if seriesData changes
+  $: {
+    if (seriesData) {
+      effectiveSeries.set(seriesData);
+      if (unsubscribe) {
+        unsubscribe();
+        unsubscribe = null;
+      }
+    } else if (!unsubscribe) {
+      unsubscribe = seriesStore.subscribe(effectiveSeries.set);
+    }
+  }
+
+  onDestroy(() => {
+    if (unsubscribe) unsubscribe();
   });
+
+  const totalOwned = derived(effectiveSeries, ($list) =>
+    $list.reduce((sum, s) => sum + (s.volumes?.filter(v => v.owned).length || 0), 0)
+  );
 </script>
 
 <style>
@@ -30,9 +51,6 @@
   }
 </style>
 
-{#if $seriesStore.length > 0}
-  <div class="owned-count">
-    📚 Total Volumes Owned:
-    <strong>{$totalOwned}</strong>
-  </div>
-{/if}
+<div class="owned-count">
+  📚 Total Volumes Owned: <strong>{$totalOwned}</strong>
+</div>

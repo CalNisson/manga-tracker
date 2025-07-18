@@ -1,5 +1,5 @@
 <script>
-    import { token, username } from './stores/authStore';
+    import { token, user } from './stores/authStore';
     import { isMobile } from './stores/screenStore';
     import Login from './components/Login.svelte';
     import Register from './components/Register.svelte';
@@ -32,8 +32,8 @@
           {/if}
         </a>
         <div style="display: flex; align-items: center; gap: 1rem;">
-          {#if $username}
-            <span>Welcome, {$username}!</span>
+          {#if $user.username}
+            <span>Welcome, {$user.username}!</span>
           {/if}
           <button on:click={logout}>Logout</button>
         </div>

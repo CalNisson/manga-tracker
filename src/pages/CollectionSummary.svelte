@@ -2,10 +2,16 @@
   import { seriesStore, fetchSeries } from "../stores/seriesStore";
   import { onMount } from "svelte";
   import OwnedCountTile from "../components/OwnedCountTile.svelte";
+  import { user } from '../stores/authStore';
+  import { get } from 'svelte/store';
+  import { API_BASE } from '../stores/api.js';
 
   let seriesList = [];
   let sortedList = [];
   let sortBy = "title";
+  let adminSearch = '';
+  let otherUserSeries = [];
+  let layoutMap = {};
 
   const maxDisplayVolumes = 56;
   const baseTileSize = 20; // px
@@ -49,6 +55,24 @@
     return best || { columns: 20, size: MIN_TILE_SIZE, gap: 1 };
   }
 
+  async function searchUser() {
+    const currentUser = get(user);
+    if (!currentUser.isAdmin || !adminSearch) return;
+
+    const res = await fetch(`${API_BASE}/admin/series/${encodeURIComponent(adminSearch)}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+
+    if (res.ok) {
+      otherUserSeries = await res.json();
+    } else {
+      otherUserSeries = [];
+      alert("User not found or not accessible.");
+    }
+  }
+
   onMount(() => {
     fetchSeries();
     const unsubscribe = seriesStore.subscribe(data => {
@@ -84,9 +108,12 @@
   }
 
   $: sortedList = sortSeries(seriesList || [], sortBy);
-  $: layoutMap = Object.fromEntries(
-    sortedList.map(series => [series.id, getVolumeLayout(series)])
-  );
+  $: {
+    const activeList = otherUserSeries.length > 0 ? otherUserSeries : sortedList;
+    layoutMap = Object.fromEntries(
+      activeList.map(series => [series.id, getVolumeLayout(series)])
+    );
+  }
 </script>
 
 <style>
@@ -219,6 +246,18 @@
 <div class="page-container">
   <div class="summary-header">
     <h2>Collection Summary</h2>
+    {#if $user.isAdmin}
+      <form
+        on:submit|preventDefault={searchUser}
+        style="margin-bottom: 1rem;"
+      >
+        <input
+          placeholder="Search by username..."
+          bind:value={adminSearch}
+        />
+        <button type="submit">View Collection</button>
+      </form>
+    {/if}
     <label class="sort-select">
       Sort by:
       <select bind:value={sortBy}>
@@ -228,11 +267,11 @@
         <option value="percent_owned">% Owned</option>
       </select>
     </label>
-    <OwnedCountTile />
+    <OwnedCountTile seriesData={otherUserSeries.length > 0 ? otherUserSeries : seriesList} />
   </div>
 
   <div class="grid">
-    {#each sortedList as series (series.id)}
+    {#each (otherUserSeries.length > 0 ? sortSeries(otherUserSeries, sortBy) : sortedList) as series (series.id)}
       {#key series.id}
         <div class="tile">
           <div class="tile-left">
