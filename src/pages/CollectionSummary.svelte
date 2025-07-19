@@ -12,14 +12,15 @@
   let adminSearch = '';
   let otherUserSeries = [];
   let layoutMap = {};
+  let separateCompleted = false;
 
   const maxDisplayVolumes = 56;
-  const baseTileSize = 20; // px
+  const baseTileSize = 20;
 
   function getVolumeLayout(series) {
     const count = series.volumes?.length || 0;
 
-    if (count <= 56) {
+    if (count <= maxDisplayVolumes) {
       return { columns: 8, size: 20, gap: 3 };
     }
 
@@ -83,6 +84,7 @@
 
   function sortSeries(list, sortBy) {
     if (!Array.isArray(list)) return [];
+
     return [...list].sort((a, b) => {
       if (sortBy === "title") return a.title?.localeCompare(b.title) ?? 0;
       if (sortBy === "total_volumes") {
@@ -107,12 +109,18 @@
     });
   }
 
-  $: sortedList = sortSeries(seriesList || [], sortBy);
   $: {
-    const activeList = otherUserSeries.length > 0 ? otherUserSeries : sortedList;
-    layoutMap = Object.fromEntries(
-      activeList.map(series => [series.id, getVolumeLayout(series)])
-    );
+    const activeList = otherUserSeries.length > 0 ? otherUserSeries : seriesList;
+    const complete = activeList.filter(s => s.completed);
+    const incomplete = activeList.filter(s => !s.completed);
+    sortedList = separateCompleted
+      ? [sortSeries(complete, sortBy), sortSeries(incomplete, sortBy)]
+      : [sortSeries(activeList, sortBy)];
+  }
+
+  $: {
+    const flatList = sortedList.flat();
+    layoutMap = Object.fromEntries(flatList.map(series => [series.id, getVolumeLayout(series)]));
   }
 </script>
 
@@ -241,23 +249,71 @@
     margin-bottom: 2rem;
     text-align: center;
   }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 48px;
+    height: 24px;
+  }
+
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 4px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+  }
+
+  input:checked + .slider {
+    background-color: #38a169;
+  }
+
+  input:checked + .slider:before {
+    transform: translateX(24px);
+  }
+
+  .divider {
+    width: 100%;
+    height: 2px;
+    background-color: #ccc;
+    margin: 2rem auto;
+  }
 </style>
 
 <div class="page-container">
   <div class="summary-header">
     <h2>Collection Summary</h2>
+
     {#if $user.isAdmin}
-      <form
-        on:submit|preventDefault={searchUser}
-        style="margin-bottom: 1rem;"
-      >
-        <input
-          placeholder="Search by username..."
-          bind:value={adminSearch}
-        />
+      <form on:submit|preventDefault={searchUser} style="margin-bottom: 1rem;">
+        <input placeholder="Search by username..." bind:value={adminSearch} />
         <button type="submit">View Collection</button>
       </form>
     {/if}
+
     <label class="sort-select">
       Sort by:
       <select bind:value={sortBy}>
@@ -267,12 +323,21 @@
         <option value="percent_owned">% Owned</option>
       </select>
     </label>
+
+    <label style="display: flex; align-items: center; gap: 0.5rem;">
+      <span>Separate Completed</span>
+      <div class="switch">
+        <input type="checkbox" bind:checked={separateCompleted} />
+        <span class="slider"></span>
+      </div>
+    </label>
+
     <OwnedCountTile seriesData={otherUserSeries.length > 0 ? otherUserSeries : seriesList} />
   </div>
 
-  <div class="grid">
-    {#each (otherUserSeries.length > 0 ? sortSeries(otherUserSeries, sortBy) : sortedList) as series (series.id)}
-      {#key series.id}
+  {#each sortedList as group, index}
+    <div class="grid">
+      {#each group as series (series.id)}
         <div class="tile">
           <div class="tile-left">
             {#if series.image_url}
@@ -307,7 +372,11 @@
             </div>
           </div>
         </div>
-      {/key}
-    {/each}
-  </div>
+      {/each}
+    </div>
+
+    {#if separateCompleted && index === 0 && sortedList.length > 1}
+      <div class="divider"></div>
+    {/if}
+  {/each}
 </div>
