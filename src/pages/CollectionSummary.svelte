@@ -301,6 +301,18 @@
     background-color: #ccc;
     margin: 2rem auto;
   }
+
+  .completed-series {
+    box-shadow: 0 0 6px 4px rgba(211, 175, 55, 0.3);
+    border: 1px solid #d3af37;
+  }
+
+  .completed-series .volume-tile.owned {
+    background-color: #d3af37;
+    color: #000;
+    border: 1px solid #b9982f;
+    font-weight: bold;
+  }
 </style>
 
 <div class="page-container">
@@ -338,7 +350,7 @@
   {#each sortedList as group, index}
     <div class="grid">
       {#each group as series (series.id)}
-        <div class="tile">
+        <div class="tile {series.completed ? 'completed-series' : ''}">
           <div class="tile-left">
             {#if series.image_url}
               <img src={series.image_url} alt={series.title} class="cover" />
