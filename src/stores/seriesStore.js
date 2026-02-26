@@ -57,12 +57,13 @@ export async function fetchSeries() {
   }
 }
 
-export async function addSeries(title, totalVolumes, score = null, tags = []) {
+export async function addSeries(title, totalVolumes, score = null, tags = [], mal_id = null) {
   const payload = {
     title,
     total_volumes: totalVolumes,
     score,
-    tags
+    tags,
+    mal_id
   };
 
   const res = await authFetch(`${API_BASE}/series`, {
@@ -70,7 +71,16 @@ export async function addSeries(title, totalVolumes, score = null, tags = []) {
     body: JSON.stringify(payload),
   });
 
-  if (res?.ok) fetchSeries();
+  if (res?.ok) {
+    fetchSeries();
+    return { ok: true };
+  }
+
+  // Try to surface useful errors
+  let text = '';
+  try { text = await res.text(); } catch {}
+  console.error('Failed to add series:', res?.status, text);
+  return { ok: false, status: res?.status, error: text };
 }
 
 
