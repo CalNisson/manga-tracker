@@ -1,7 +1,6 @@
 <script>
   import { onMount } from 'svelte';
   import { fetchSeries } from '../stores/seriesStore';
-  import { backendStarting } from '../stores/backendStatus';
   import { seriesStore } from '../stores/seriesStore';
   import AddSeriesForm from '../components/AddSeriesForm.svelte';
   import SeriesList from '../components/SeriesList.svelte';
@@ -14,25 +13,9 @@
   let allTags = [];
   let sortAsc = true;
 
-  $: isWakingUp = $backendStarting;
-
   onMount(() => {
     fetchSeries();
   });
-
-  let dots = '';
-  let interval;
-
-  $: if ($backendStarting) {
-    let count = 0;
-    interval = setInterval(() => {
-      count = (count + 1) % 4;
-      dots = '.'.repeat(count);
-    }, 500);
-  } else {
-    clearInterval(interval);
-    dots = '';
-  }
 
   $: {
     const tagSet = new Set();
@@ -44,15 +27,6 @@
 </script>
 
 <main style="padding: 2rem; max-width: 900px; margin: 0 auto;">
-  {#if isWakingUp}
-    <div class="overlay">
-      <div class="spinner-message">
-        <span class="gear">⚙️</span>
-        <span class="message">Waking up backend<span class="dots">{dots}</span></span>
-      </div>
-    </div>
-  {/if}
-
   <AddSeriesForm />
 
   <div class="filter-bar">
@@ -99,44 +73,6 @@
 </main>
 
 <style>
-  .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(255, 255, 255, 0.8);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.25rem;
-    font-weight: bold;
-    color: #333;
-  }
-
-  .spinner-message {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    animation: fadeIn 0.5s ease-in;
-  }
-
-  .gear {
-    font-size: 2rem;
-    animation: spin 1s linear infinite;
-    margin-bottom: 0.5rem;
-  }
-
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
   .filter-bar {
     background: white;
     padding: 1rem;

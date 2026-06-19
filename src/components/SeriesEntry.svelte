@@ -3,13 +3,14 @@
   import { progressMap } from '../stores/progressStore.js';
   import VolumeList from './VolumeList.svelte';
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
+  import { ownedVolumeCount, percentOwned } from '../utils/volumes.js';
 
   export let series;
 
   let expanded = false;
   let percent = 0;
   let showMenu = false;
-  let ownedCount = () => (series.volumes || []).filter(v => v.owned).length;
+  let ownedCount = 0;
 
   const dispatch = createEventDispatcher();
 
@@ -36,12 +37,10 @@
     showMenu = false;
   }
 
-  function handleVolumeToggle(volumeId) {
+  function handleVolumeToggle(eventDetail) {
     series = {
       ...series,
-      volumes: series.volumes.map(v =>
-        v.id === volumeId ? { ...v, owned: !v.owned } : v
-      )
+      owned_volume_numbers: eventDetail.ownedVolumeNumbers || []
     };
   }
 
@@ -49,17 +48,13 @@
     if (map[series.id] != null) {
       percent = Math.round(map[series.id]);
     } else {
-      const owned = series.volumes.filter(v => v.owned).length;
-      percent = Math.round((owned / series.total_volumes) * 100);
+      percent = percentOwned(series);
     }
   });
 
-  $: ownedCount = series.volumes ? series.volumes.filter(v => v.owned).length : 0;
+  $: ownedCount = ownedVolumeCount(series);
 
-  $: sortedSeries = {
-    ...series,
-    volumes: [...(series.volumes || [])].sort((a, b) => a.volume_number - b.volume_number)
-  };
+  $: sortedSeries = series;
 
   function toggleMenu(event) {
     event.stopPropagation();

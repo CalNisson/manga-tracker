@@ -5,6 +5,7 @@
   import { user } from '../stores/authStore';
   import { get } from 'svelte/store';
   import { API_BASE } from '../stores/api.js';
+  import { ownedVolumeCount, totalVolumeCount, volumeList } from '../utils/volumes.js';
 
   let seriesList = [];
   let sortedList = [];
@@ -18,7 +19,7 @@
   const baseTileSize = 20;
 
   function getVolumeLayout(series) {
-    const count = series.volumes?.length || 0;
+    const count = totalVolumeCount(series);
 
     if (count <= maxDisplayVolumes) {
       return { columns: 8, size: 20, gap: 3 };
@@ -92,14 +93,14 @@
         return diff !== 0 ? diff : a.title?.localeCompare(b.title) ?? 0;
       }
       if (sortBy === "owned_volumes") {
-        const ownedA = a.volumes?.filter(v => v.owned).length || 0;
-        const ownedB = b.volumes?.filter(v => v.owned).length || 0;
+        const ownedA = ownedVolumeCount(a);
+        const ownedB = ownedVolumeCount(b);
         const diff = ownedB - ownedA;
         return diff !== 0 ? diff : a.title?.localeCompare(b.title) ?? 0;
       }
       if (sortBy === "percent_owned") {
-        const ownedA = a.volumes?.filter(v => v.owned).length || 0;
-        const ownedB = b.volumes?.filter(v => v.owned).length || 0;
+        const ownedA = ownedVolumeCount(a);
+        const ownedB = ownedVolumeCount(b);
         const pctA = a.total_volumes > 0 ? ownedA / a.total_volumes : 0;
         const pctB = b.total_volumes > 0 ? ownedB / b.total_volumes : 0;
         const diff = pctB - pctA;
@@ -365,8 +366,8 @@
               class="volume-grid"
               style="grid-template-columns: repeat({layoutMap[series.id].columns}, {layoutMap[series.id].size}px); gap: {layoutMap[series.id].gap}px;"
             >
-              {#each series.volumes?.sort((a,b) => a.volume_number - b.volume_number) as vol (vol.id)}
-                {#if series.volumes?.length > maxDisplayVolumes}
+              {#each volumeList(series) as vol (vol.volume_number)}
+                {#if totalVolumeCount(series) > maxDisplayVolumes}
                   <div
                     class="volume-tile {vol.owned ? 'owned' : ''} hidden-number"
                     data-volume-number={vol.volume_number}

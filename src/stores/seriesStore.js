@@ -1,48 +1,28 @@
 import { writable } from 'svelte/store';
-import { token } from './authStore';
-import { backendStarting } from './backendStatus';
+import { clearSession, getValidToken } from './authStore';
 import { API_BASE } from './api.js';
 
 export const seriesStore = writable([]);
 
 async function authFetch(url, options = {}) {
-  const $token = localStorage.getItem('token');
-  if (!$token) throw new Error('Not authenticated');
+  const currentToken = getValidToken();
+  if (!currentToken) throw new Error('Not authenticated');
 
-  const headers = options.headers || {};
-  headers['Authorization'] = `Bearer ${$token}`;
+  const headers = { ...(options.headers || {}) };
+  headers.Authorization = `Bearer ${currentToken}`;
   headers['Content-Type'] = headers['Content-Type'] || 'application/json';
-  options.headers = headers;
 
-  let wakeNoticeShown = false;
-  const wakeTimeout = setTimeout(() => {
-    backendStarting.set(true);
-    wakeNoticeShown = true;
-  }, 1500);
+  const res = await fetch(url, {
+    ...options,
+    headers,
+  });
 
-  try {
-    const res = await fetch(url, options);
-    clearTimeout(wakeTimeout);
-
-    if (res.status === 401) {
-      backendStarting.set(false);
-      token.set('');
-      alert('Session expired. Please log in again.');
-      location.reload();
-      return null;
-    }
-
-    if (wakeNoticeShown) {
-      setTimeout(() => backendStarting.set(false), 3000);
-    }
-
-    return res;
-  } catch (err) {
-    clearTimeout(wakeTimeout);
-    backendStarting.set(false);
-    console.error('Fetch error:', err);
-    throw err;
+  if (res.status === 401) {
+    clearSession();
+    throw new Error('Session expired');
   }
+
+  return res;
 }
 
 export async function fetchSeries() {
@@ -97,20 +77,29 @@ export async function toggleComplete(id) {
   }
 }
 
-export async function toggleOwned(volumeId) {
-  const res = await authFetch(`${API_BASE}/volumes/${volumeId}/toggle`, {
+export async function toggleOwned(seriesId, volumeNumber) {
+  const res = await authFetch(`${API_BASE}/series/${seriesId}/volumes/${volumeNumber}/toggle`, {
     method: 'POST',
   });
 
   if (res?.ok) {
-    fetchSeries();
-  } else {
-    console.error('Failed to update volume ownership:', await res.text());
+    const result = await res.json();
+    seriesStore.update((seriesList) =>
+      seriesList.map((s) =>
+        s.id === seriesId
+          ? { ...s, owned_volume_numbers: result.owned_volume_numbers || [] }
+          : s
+      )
+    );
+    return result;
   }
+
+  console.error('Failed to update volume ownership:', await res.text());
+  return null;
 }
 
 export async function updateSeries(id, data) {
-  console.log("Updating series:", id, data);
+  console.log('Updating series:', id, data);
   const res = await authFetch(`${API_BASE}/series/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(data),

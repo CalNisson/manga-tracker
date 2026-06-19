@@ -2,6 +2,7 @@
   import { seriesStore } from "../stores/seriesStore";
   import { derived, writable } from "svelte/store";
   import { onDestroy } from "svelte";
+  import { ownedVolumeCount } from "../utils/volumes.js";
 
   export let seriesData = null;
 
@@ -27,7 +28,7 @@
   });
 
   const totalOwned = derived(effectiveSeries, ($list) =>
-    $list.reduce((sum, s) => sum + (s.volumes?.filter(v => v.owned).length || 0), 0)
+    $list.reduce((sum, s) => sum + ownedVolumeCount(s), 0)
   );
 </script>
 

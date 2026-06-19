@@ -1,50 +1,47 @@
 <script>
-  import { seriesStore, toggleOwned } from '../stores/seriesStore';
+  import { toggleOwned } from '../stores/seriesStore';
   import { progressMap } from '../stores/progressStore.js';
   import { createEventDispatcher } from 'svelte';
-  export let series;
+  import { ownedVolumeCount, toggledOwnedVolumeNumbers, volumeList } from '../utils/volumes.js';
 
-  let ownedCount = 0;
-  let totalCount = series.total_volumes;
+  export let series;
 
   const dispatch = createEventDispatcher();
 
-  function updateProgress() {
-    ownedCount = series.volumes.filter(v => v.owned).length;
-    const percent = (ownedCount / totalCount) * 100;
-    progressMap.update(map => {
-      return { ...map, [series.id]: percent };
-    });
+  $: volumes = volumeList(series);
+  $: totalCount = series.total_volumes || 0;
+
+  function updateProgress(nextSeries = series) {
+    const ownedCount = ownedVolumeCount(nextSeries);
+    const percent = totalCount ? (ownedCount / totalCount) * 100 : 0;
+    progressMap.update(map => ({ ...map, [series.id]: percent }));
   }
 
-  async function handleToggleOwnership(volumeId) {
-    const volumeIndex = series.volumes.findIndex(v => v.id === volumeId);
-    if (volumeIndex !== -1) {
-      const updatedVolumes = [...series.volumes];
-      updatedVolumes[volumeIndex] = {
-        ...updatedVolumes[volumeIndex],
-        owned: !updatedVolumes[volumeIndex].owned
-      };
+  async function handleToggleOwnership(volumeNumber) {
+    const previousOwned = series.owned_volume_numbers || [];
+    const nextOwned = toggledOwnedVolumeNumbers(series, volumeNumber);
 
-      // Update local volumes
-      series.volumes = updatedVolumes;
-      updateProgress();
+    series = { ...series, owned_volume_numbers: nextOwned };
+    updateProgress(series);
+    dispatch('volumeToggle', { seriesId: series.id, volumeNumber, ownedVolumeNumbers: nextOwned });
 
-      // Now update the backend and the store
-      await toggleOwned(volumeId);  // <-- Call the `toggleOwned` function from seriesStore.js
-      dispatch('volumeToggle', volumeId);
+    const result = await toggleOwned(series.id, volumeNumber);
+    if (!result) {
+      series = { ...series, owned_volume_numbers: previousOwned };
+      updateProgress(series);
+      dispatch('volumeToggle', { seriesId: series.id, volumeNumber, ownedVolumeNumbers: previousOwned });
     }
   }
 
   updateProgress();
 </script>
 
-{#if series.volumes?.length}
+{#if volumes.length}
   <div class="volume-list">
-    {#each series.volumes as v (v.id)}
+    {#each volumes as v (v.volume_number)}
       <div
         class="volume {v.owned ? 'owned' : ''}"
-        on:click|stopPropagation={() => handleToggleOwnership(v.id)}>
+        on:click|stopPropagation={() => handleToggleOwnership(v.volume_number)}>
         Vol. {v.volume_number}
       </div>
     {/each}
@@ -99,5 +96,4 @@
       transform: translateY(0);
     }
   }
-
 </style>

@@ -6,6 +6,7 @@
   import MobileSeriesEntry from './MobileSeriesEntry.svelte';
   import EditSeriesModal from './EditSeriesModal.svelte';
   import { onDestroy } from 'svelte';
+  import { ownedVolumeCount } from '../utils/volumes.js';
 
   export let filterCompleted = false;
   export let searchTerm = '';
@@ -43,8 +44,8 @@
       (!selectedTag || (s.tags || []).includes(selectedTag))
     )
     .sort((a, b) => {
-      const ownedA = (a.volumes || []).filter(v => v.owned).length;
-      const ownedB = (b.volumes || []).filter(v => v.owned).length;
+      const ownedA = ownedVolumeCount(a);
+      const ownedB = ownedVolumeCount(b);
       const percentA = a.total_volumes ? ownedA / a.total_volumes : 0;
       const percentB = b.total_volumes ? ownedB / b.total_volumes : 0;
 
