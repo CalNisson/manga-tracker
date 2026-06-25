@@ -1,39 +1,28 @@
 <script>
   import { toggleOwned } from '../stores/seriesStore';
-  import { progressMap } from '../stores/progressStore.js';
   import { createEventDispatcher } from 'svelte';
-  import { ownedVolumeCount, toggledOwnedVolumeNumbers, volumeList } from '../utils/volumes.js';
+  import { toggledOwnedVolumeNumbers, volumeList } from '../utils/volumes.js';
 
   export let series;
 
   const dispatch = createEventDispatcher();
 
   $: volumes = volumeList(series);
-  $: totalCount = series.total_volumes || 0;
-
-  function updateProgress(nextSeries = series) {
-    const ownedCount = ownedVolumeCount(nextSeries);
-    const percent = totalCount ? (ownedCount / totalCount) * 100 : 0;
-    progressMap.update(map => ({ ...map, [series.id]: percent }));
-  }
 
   async function handleToggleOwnership(volumeNumber) {
     const previousOwned = series.owned_volume_numbers || [];
     const nextOwned = toggledOwnedVolumeNumbers(series, volumeNumber);
 
     series = { ...series, owned_volume_numbers: nextOwned };
-    updateProgress(series);
     dispatch('volumeToggle', { seriesId: series.id, volumeNumber, ownedVolumeNumbers: nextOwned });
 
     const result = await toggleOwned(series.id, volumeNumber);
     if (!result) {
       series = { ...series, owned_volume_numbers: previousOwned };
-      updateProgress(series);
       dispatch('volumeToggle', { seriesId: series.id, volumeNumber, ownedVolumeNumbers: previousOwned });
     }
   }
 
-  updateProgress();
 </script>
 
 {#if volumes.length}

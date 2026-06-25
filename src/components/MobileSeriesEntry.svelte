@@ -2,25 +2,16 @@
   import { toggleComplete } from '../stores/seriesStore';
   import { createEventDispatcher, onMount, onDestroy } from 'svelte';
   import VolumeList from './VolumeList.svelte';
-  import { progressMap } from '../stores/progressStore.js';
   import { ownedVolumeCount, percentOwned } from '../utils/volumes.js';
 
   export let series;
 
   let expanded = false;
   let showMenu = false;
-  let percent = 0;
 
   const dispatch = createEventDispatcher();
 
-  $: progressMap.subscribe((map) => {
-    if (map[series.id] != null) {
-      percent = Math.round(map[series.id]);
-    } else {
-      percent = percentOwned(series);
-    }
-  });
-
+  $: percent = percentOwned(series);
   $: sortedSeries = series;
 
   function toggleExpanded(event) {
